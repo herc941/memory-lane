@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6eee4">
+<title>For Nakitha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f6eee4;
+    --ink: #2e2428;
+    --soft: #7d6b70;
+    --accent: #b5566f;
+    --glow: rgba(214, 120, 140, .55);
+    --frame: #fffdf9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+    background-color: var(--paper);
+    overflow-x: hidden;
+  }
+  /* warm light + vignette, like an old photo (fixed layers instead of background-attachment, which phones ignore) */
+  body::before, body::after { content: ''; position: fixed; inset: 0; pointer-events: none; }
+  body::before {
+    z-index: -1;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255, 244, 230, .9), transparent 60%),
+      radial-gradient(ellipse at 50% 100%, rgba(232, 205, 190, .5), transparent 60%);
+  }
+  body::after { z-index: 50; box-shadow: inset 0 0 180px rgba(90, 50, 40, .18); }
+
+  /* ---------- Opening ---------- */
+  .hero {
+    min-height: 100vh; min-height: 100svh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 48px 16px 32px; position: relative; z-index: 2;
+  }
+  .hero .photo.us { --tilt: -2deg; margin-bottom: 36px; width: min(380px, 84vw); }
+  .hero h1 {
+    font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400;
+    font-size: clamp(2.8rem, 9vw, 5.5rem); line-height: 1.05;
+    opacity: 0; animation: rise 1.6s ease forwards .5s;
+  }
+  .scroll {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 48px; height: 48px; margin-top: 28px;
+    color: var(--accent); text-decoration: none; font-size: 1.6rem;
+    opacity: 0; animation: rise 1.6s ease forwards 1.6s;
+  }
+  .scroll span { display: block; animation: bob 2.4s ease-in-out infinite; }
+
+  /* ---------- The lane ---------- */
+  .lane { position: relative; padding-bottom: 40px; overflow: hidden; }
+  .lane svg.path { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 0; }
+  .walker {
+    position: absolute; top: 0; left: 0; z-index: 0; pointer-events: none; /* slips behind the words */
+    width: 24px; height: 24px; margin: -12px 0 0 -12px;
+    opacity: 0; transition: opacity .6s ease;
+    will-change: transform;
+  }
+  .walker span {
+    display: block; width: 24px; height: 24px; line-height: 24px; text-align: center;
+    color: var(--accent); font-size: 20px;
+    filter: drop-shadow(0 2px 4px rgba(150, 50, 70, .35));
+    animation: beat 2.4s cubic-bezier(.45, 0, .55, 1) infinite;
+  }
+
+  .stop {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 540px) minmax(0, 1fr);
+    grid-template-areas: "l t r";
+    align-items: center; gap: 40px;
+    min-height: 82vh; padding: 48px 32px;
+  }
+  .slot { display: flex; position: relative; z-index: 2; }
+  .slot.l { grid-area: l; justify-content: flex-end; }
+  .slot.r { grid-area: r; justify-content: flex-start; }
+  .stop:nth-child(odd)  .slot.l { align-self: start; }
+  .stop:nth-child(odd)  .slot.r { align-self: end; }
+  .stop:nth-child(even) .slot.l { align-self: end; }
+  .stop:nth-child(even) .slot.r { align-self: start; }
+
+  .text {
+    grid-area: t; position: relative; z-index: 1;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(1.25rem, 2.2vw, 1.48rem); line-height: 1.7;
+    background: radial-gradient(closest-side, rgba(246, 238, 228, .92), rgba(246, 238, 228, 0));
+    padding: 24px 8px;
+  }
+  .text p + p { margin-top: 1.1em; }
+  .text .greet { font-style: italic; font-size: 1.15em; }
+  .text h2 {
+    font-weight: 400; font-size: clamp(2.2rem, 5vw, 3rem); text-align: center; line-height: 1.2;
+  }
+  .text .kicker {
+    display: block; text-align: center; font-family: 'Inter', sans-serif; font-size: .75rem;
+    letter-spacing: .26em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px;
+  }
+  .text.promise { text-align: center; font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.4; }
+  .text.promise .num {
+    display: block; font-style: italic; color: var(--accent); font-size: .7em; margin-bottom: 6px;
+  }
+  .text.closing { text-align: center; }
+  .text.closing p:first-child { font-style: italic; font-size: clamp(1.5rem, 3vw, 1.95rem); line-height: 1.45; }
+  .text .sign { font-family: 'Caveat', cursive; font-size: 2rem; color: var(--accent); margin-top: 28px; }
+  .heart {
+    color: var(--accent); font-size: 1.6rem; display: inline-block;
+    animation: beat 2.4s cubic-bezier(.45, 0, .55, 1) infinite;
+  }
+
+  /* ---------- Photos ---------- */
+  .photo {
+    --tilt: 0deg; --dx: 0px;
+    position: relative;
+    width: min(230px, 100%);
+    background: var(--frame);
+    padding: 9px 9px 30px;
+    border-radius: 2px;
+    box-shadow: 0 2px 4px rgba(60, 30, 30, .08), 0 12px 28px rgba(60, 30, 30, .14);
+    transform: translateX(var(--dx)) rotate(var(--tilt));
+    transition: transform .6s cubic-bezier(.2, .8, .2, 1), box-shadow .4s ease, opacity 1.2s ease;
+    -webkit-touch-callout: none;
+  }
+  .photo img { display: block; width: 100%; height: auto; border-radius: 1px; transition: filter 1.4s ease; }
+  /* faded, like an old print */
+  .photo:not(.us) img { filter: sepia(.38) saturate(.72) contrast(.94) brightness(1.03); }
+  .photo:not(.us)::before { /* tape */
+    content: ''; position: absolute; top: -12px; left: 50%; width: 84px; height: 24px;
+    transform: translateX(-50%) rotate(-3deg);
+    background: rgba(236, 222, 196, .78); box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
+  }
+  @media (hover: hover) {
+    .photo:not(.us):hover { transform: rotate(0deg) scale(1.06); z-index: 5; box-shadow: 0 20px 44px rgba(60, 30, 30, .22); }
+    .photo:not(.us):hover img { filter: none; }
+  }
+
+  /* the two of us — full colour, bigger, glowing */
+  .photo.us {
+    width: min(360px, 100%);
+    padding: 14px 14px 58px;
+    box-shadow: 0 0 0 1px rgba(181, 86, 111, .18), 0 22px 60px rgba(150, 60, 80, .28);
+    z-index: 3;
+  }
+  .photo.us::after { /* the glow breathes by fading, which phones can animate smoothly */
+    content: ''; position: absolute; inset: 0; z-index: -1; border-radius: 2px; pointer-events: none;
+    box-shadow: 0 0 90px 10px var(--glow);
+    opacity: .45; animation: breathe 4s ease-in-out infinite;
+  }
+  .photo.us .pin {
+    position: absolute; top: -17px; left: 50%; transform: translateX(-50%);
+    width: 34px; height: 34px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #e88aa0, #a83c58);
+    box-shadow: 0 3px 8px rgba(120, 30, 50, .4);
+    display: grid; place-items: center; color: #fff; font-size: 15px; line-height: 1;
+  }
+  .photo.us figcaption {
+    position: absolute; left: 0; right: 0; bottom: 12px; text-align: center;
+    font-family: 'Caveat', cursive; font-size: 1.55rem; color: var(--accent); line-height: 1;
+  }
+  .photo.us figcaption small { display: block; font-size: .75em; color: var(--soft); margin-top: 3px; }
+
+  /* ---------- The end of the lane: our video ---------- */
+  .finale { position: relative; z-index: 2; display: flex; justify-content: center; padding: 40px 16px 140px; }
+  .photo.us.film { width: min(760px, 92vw); padding: 16px 16px 66px; }
+  .photo.film video {
+    display: block; width: 100%; height: auto; border-radius: 1px; background: #000;
+    pointer-events: none; transition: filter 1.4s ease;
+  }
+  .photo.film video::-webkit-media-controls,
+  .photo.film video::-webkit-media-controls-start-playback-button,
+  .photo.film video::-webkit-media-controls-overlay-play-button { display: none !important; -webkit-appearance: none; }
+  .photo.us.film figcaption { font-size: clamp(1.4rem, 4vw, 2rem); bottom: 16px; padding: 0 12px; }
+
+  /* reveal: memories coming back into focus */
+  .photo.pending { opacity: 0; }
+  .slot.l .photo.pending { --dx: -50px; }
+  .slot.r .photo.pending { --dx: 50px; }
+  .photo.pending img, .photo.film.pending video { filter: blur(6px) grayscale(1) !important; }
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity 1.2s ease, transform 1.2s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(7px); } }
+  /* a soft "lub-dub" heartbeat */
+  @keyframes beat {
+    0%   { transform: scale(1); }
+    14%  { transform: scale(1.14); }
+    28%  { transform: scale(1.02); }
+    42%  { transform: scale(1.1); }
+    70%, 100% { transform: scale(1); }
+  }
+  @keyframes breathe { 0%, 100% { opacity: .35; } 50% { opacity: .8; } }
+
+  /* ---------- Phones: photos above and below the words ---------- */
+  @media (max-width: 900px) {
+    .stop {
+      grid-template-columns: minmax(0, 1fr); grid-template-areas: "l" "t" "r";
+      gap: 28px; min-height: 0; padding: 40px 16px;
+    }
+    .slot, .stop:nth-child(n) .slot.l, .stop:nth-child(n) .slot.r { align-self: auto; }
+    .slot.l { justify-content: flex-start; padding-left: 4%; }
+    .slot.r { justify-content: flex-end; padding-right: 4%; }
+    .slot.center { justify-content: center; padding: 0; }
+    .photo { width: min(220px, 60vw); }
+    .photo.us { width: min(340px, 86vw); }
+    .photo.us::after { box-shadow: 0 0 60px 6px var(--glow); }
+    .text { padding: 16px 4px; }
+    .finale { padding-bottom: 100px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .reveal, .photo.pending, .hero h1, .scroll { opacity: 1 !important; transform: none !important; }
+    .photo.pending img, .photo.film.pending video { filter: none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="hero">
+    <figure class="photo us" data-src="photos/us0.jpg">
+      <span class="pin">&#9829;</span>
+      <figcaption>you &amp; me</figcaption>
+    </figure>
+    <h1>Nakitha,</h1>
+    <a class="scroll" href="#lane" aria-label="Scroll down"><span>&#8595;</span></a>
+  </header>
+
+  <main class="lane" id="lane">
+    <svg class="path" aria-hidden="true">
+      <defs><clipPath id="walked"><rect id="walkedRect" x="0" y="0" width="0" height="0"/></clipPath></defs>
+      <path id="trail" fill="none" stroke="#b5566f" stroke-width="2.2" stroke-dasharray="2 11" stroke-linecap="round" opacity=".55" clip-path="url(#walked)"/>
+    </svg>
+    <div class="walker" aria-hidden="true"><span>&#9829;</span></div>
+
+    <section class="stop" data-l="m" data-r="m">
+      <div class="text reveal">
+        <p class="greet">My love,</p>
+        <p>I cheated on you. I've typed that and deleted it so many times, because seeing it written down makes it real, and I hate that it's real.</p>
+        <p>I'm not going to try to make it sound smaller than it is. You trusted me with your heart and I hurt it. You never gave me a reason, not even one. This is all on me, baby.</p>
+      </div>
+    </section>
+
+    <section class="stop" data-l="us" data-r="m">
+      <div class="text reveal">
+        <p>I regret it more than anything I've ever done. I keep replaying it in my head, wishing I could go back and be the person you believed I was.</p>
+        <p>And I'm not sorry because of what I might lose, even though I'm so, so scared of losing you. I'm sorry because you deserved so much better from me, and I let you down when it mattered the most. Pole sana, my love.</p>
+      </div>
+    </section>
+
+    <section class="stop" data-l="m" data-r="m">
+      <div class="text reveal">
+        <p>Going through all these pictures hurts, because I know I'm the one who put a crack in something this beautiful.</p>
+        <p>Everything we had was real. Every "I love you," every late night call, every plan we made, every time I told you you're the one. I meant all of it, and I still mean every single word.</p>
+        <p>I know what I did makes that harder to believe. If you're doubting it right now, I get it. That's my fault, not yours. None of this was ever your fault, I swear.</p>
+      </div>
+    </section>
+
+    <section class="stop" data-l="m" data-r="us">
+      <div class="text reveal">
+        <p>I'm asking you to forgive me. Not because I deserve it, because I don't, but because I love you and I couldn't let us go without at least asking.</p>
+        <p>It's your choice, baby, when or if. Whatever you decide, I'll respect it. But if you give me the chance, I'll spend every single day earning back the trust I broke.</p>
+      </div>
+    </section>
+
+    <section class="stop" data-l="m" data-r="m">
+      <div class="text reveal">
+        <span class="kicker">from me, to you</span>
+        <h2>My promise to you</h2>
+      </div>
+    </section>
+
+    <section class="stop" data-l="us" data-r="m">
+      <div class="text promise reveal"><span class="num">i.</span>I will never cheat on you again. Never.</div>
+    </section>
+
+    <section class="stop" data-l="m" data-r="m">
+      <div class="text promise reveal"><span class="num">ii.</span>I will always be honest with you, even when the truth is hard to say.</div>
+    </section>
+
+    <section class="stop" data-l="m" data-r="us">
+      <div class="text promise reveal"><span class="num">iii.</span>I will answer every question you have, as many times as you need to ask.</div>
+    </section>
+
+    <section class="stop" data-l="m" data-r="m">
+      <div class="text promise reveal"><span class="num">iv.</span>I will show you with what I do, every single day, not just with words.</div>
+    </section>
+
+    <section class="stop" data-l="us" data-r="m">
+      <div class="text promise reveal"><span class="num">v.</span>I will love you the way you deserved to be loved all along.</div>
+    </section>
+
+    <section class="stop" data-l="m" data-r="m">
+      <div class="text closing reveal">
+        <p>I'm so sorry, Nakitha. Take all the time you need. I'll always be waiting for you.</p>
+        <p class="sign">Forever yours, Jonathan</p>
+        <span class="heart">&#10084;</span>
+      </div>
+    </section>
+
+    <section class="finale">
+      <figure class="photo us film pending">
+        <span class="pin">&#9829;</span>
+        <video src="photos/us-video.mp4" poster="photos/us-video-poster.jpg"
+               autoplay muted loop playsinline webkit-playsinline disablepictureinpicture disableremoteplayback preload="auto"></video>
+        <figcaption>this is us. I don't ever want to lose it.</figcaption>
+      </figure>
+    </section>
+  </main>
+
+<script>
+  // Memories run in the order they were taken; photos of the two of us are spread along the whole walk.
+  const MEMORIES = Array.from({ length: 17 }, (_, i) => 'photos/m' + String(i + 1).padStart(2, '0') + '.jpg');
+  const US = [
+    { src: 'photos/us1.jpg', caption: 'us', date: '29 July 2025' },
+    { src: 'photos/us2.jpg', caption: 'my favourite place', date: '29 July 2025' },
+    { src: 'photos/us3.jpg', caption: 'you & me', date: '29 July 2025' },
+    { src: 'photos/us4.jpg', caption: 'always you', date: '29 July 2025' },
+    { src: 'photos/us5.jpg', caption: 'us', date: '13 September 2025' },
+  ];
+  const TILTS = [-4, 3, -2, 5, -5, 2, 4, -3];
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const lane = document.getElementById('lane');
+  let m = 0, u = 0, t = 0;
+
+  function makePhoto(src, isUs, caption, date) {
+    const fig = document.createElement('figure');
+    fig.className = 'photo' + (isUs ? ' us' : '');
+    fig.dataset.src = src;
+    if (isUs) {
+      fig.innerHTML = '<span class="pin">&#9829;</span><figcaption></figcaption>';
+      fig.querySelector('figcaption').innerHTML = caption + (date ? '<small>' + date + '</small>' : '');
+    }
+    return fig;
+  }
+
+  document.querySelectorAll('.stop').forEach(stop => {
+    ['l', 'r'].forEach(side => {
+      const kind = stop.dataset[side];
+      let fig = null;
+      if (kind === 'us' && u < US.length) { const p = US[u++]; fig = makePhoto(p.src, true, p.caption, p.date); }
+      else if (kind === 'm' && m < MEMORIES.length) { fig = makePhoto(MEMORIES[m++], false); }
+      const slot = document.createElement('div');
+      slot.className = 'slot ' + side + (kind === 'us' ? ' center' : '');
+      if (fig) {
+        fig.style.setProperty('--tilt', (fig.classList.contains('us') ? TILTS[t] / 2 : TILTS[t]) + 'deg');
+        t = (t + 1) % TILTS.length;
+        slot.appendChild(fig);
+      }
+      stop.appendChild(slot);
+    });
+  });
+
+  // load every photo; a deleted file simply disappears
+  document.querySelectorAll('.photo[data-src]').forEach(fig => {
+    const img = new Image();
+    img.alt = fig.classList.contains('us') ? 'The two of us' : 'A memory';
+    img.decoding = 'async';
+    img.draggable = false;
+    img.onload = () => queueLayout();
+    img.onerror = () => { fig.remove(); queueLayout(); };
+    img.src = fig.dataset.src;
+    fig.insertBefore(img, fig.firstChild);
+    if (!fig.closest('.hero')) fig.classList.add('pending');
+  });
+
+  // the video: silent, looping, no controls; nudged to play if a phone holds it back
+  const film = document.querySelector('.photo.film video');
+  film.muted = true;
+  const tryPlay = () => { const p = film.play(); if (p) p.catch(() => {}); };
+  film.addEventListener('loadedmetadata', () => queueLayout());
+  film.addEventListener('error', () => { film.closest('.finale').remove(); queueLayout(); });
+  tryPlay();
+  ['touchstart', 'click', 'scroll'].forEach(ev => addEventListener(ev, () => { if (film.paused) tryPlay(); }, { passive: true }));
+  new IntersectionObserver(([e]) => { if (e.isIntersecting && film.paused) tryPlay(); }).observe(film);
+
+  // reveal on scroll
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.remove('pending');
+      e.target.classList.add('in');
+      io.unobserve(e.target);
+    });
+  }, { threshold: 0.2 });
+  document.querySelectorAll('.reveal, .photo.pending').forEach(el => io.observe(el));
+
+  // ---------- the dotted lane that draws itself as you walk ----------
+  const svg = lane.querySelector('svg.path');
+  const trail = document.getElementById('trail');
+  const walkedRect = document.getElementById('walkedRect');
+  const walker = lane.querySelector('.walker');
+  let samples = [], layoutQueued = false;
+
+  function offsetIn(el, ancestor) { // position ignoring CSS transforms
+    let x = 0, y = 0;
+    while (el && el !== ancestor) { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; }
+    return { x, y };
+  }
+
+  function queueLayout() {
+    if (layoutQueued) return;
+    layoutQueued = true;
+    requestAnimationFrame(() => { layoutQueued = false; layout(); });
+  }
+
+  function layout() {
+    const w = lane.clientWidth, h = lane.scrollHeight;
+    svg.setAttribute('width', w); svg.setAttribute('height', h);
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    walkedRect.setAttribute('width', w);
+
+    // the lane runs beside each photo (on the side facing the words), never through faces
+    const pts = [{ x: w / 2, y: 0 }];
+    lane.querySelectorAll('.photo').forEach(f => {
+      const o = offsetIn(f, lane), fw = f.offsetWidth, fh = f.offsetHeight;
+      const slot = f.parentElement;
+      const centered = slot.classList.contains('finale') || getComputedStyle(slot).justifyContent === 'center';
+      if (centered) pts.push({ x: o.x + fw / 2, y: o.y - 34 });
+      else if (slot.classList.contains('l')) pts.push({ x: Math.min(w - 16, o.x + fw + 20), y: o.y + fh / 2 });
+      else pts.push({ x: Math.max(16, o.x - 20), y: o.y + fh / 2 });
+    });
+    pts.sort((a, b) => a.y - b.y);
+
+    let d = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1], b = pts[i], my = (a.y + b.y) / 2;
+      d += ` C ${a.x} ${my}, ${b.x} ${my}, ${b.x} ${b.y}`;
+    }
+    trail.setAttribute('d', d);
+
+    // sample the lane once; after this the heart only needs simple lookups
+    const total = trail.getTotalLength(), N = 900;
+    samples = [];
+    for (let i = 0; i <= N; i++) { const p = trail.getPointAtLength(total * i / N); samples.push({ x: p.x, y: p.y }); }
+    current = targetY();
+    render(current);
+  }
+
+  function targetY() {
+    const end = samples[samples.length - 1].y;
+    return Math.max(0, Math.min(end, innerHeight * 0.6 - lane.getBoundingClientRect().top));
+  }
+
+  function xAt(y) {
+    let lo = 0, hi = samples.length - 1;
+    if (y <= samples[0].y) return samples[0].x;
+    if (y >= samples[hi].y) return samples[hi].x;
+    while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (samples[mid].y <= y) lo = mid; else hi = mid; }
+    const a = samples[lo], b = samples[hi];
+    return b.y === a.y ? b.x : a.x + (b.x - a.x) * (y - a.y) / (b.y - a.y);
+  }
+
+  function render(y) {
+    walkedRect.setAttribute('height', Math.max(0, y));
+    walker.style.transform = `translate3d(${xAt(y)}px, ${y}px, 0)`;
+    const end = samples[samples.length - 1].y;
+    walker.style.opacity = y > 8 && y < end - 8 ? 1 : 0;
+  }
+
+  // the heart glides after the scroll at the same pace on every screen
+  let current = 0, gliding = false, last = 0;
+  function glide(now) {
+    const dt = Math.min(64, now - (last || now)); last = now;
+    const target = targetY();
+    current += (target - current) * (1 - Math.pow(0.9, dt / 16.7));
+    if (Math.abs(target - current) < 0.5) current = target;
+    render(current);
+    if (current !== target) requestAnimationFrame(glide); else { gliding = false; last = 0; }
+  }
+  function onScroll() {
+    if (!samples.length) return;
+    if (reduceMotion) { current = targetY(); render(current); return; }
+    if (!gliding) { gliding = true; requestAnimationFrame(glide); }
+  }
+
+  addEventListener('scroll', onScroll, { passive: true });
+  let lastW = innerWidth;
+  addEventListener('resize', () => { if (innerWidth !== lastW) { lastW = innerWidth; queueLayout(); } }); // ignore phone address-bar resizes
+  addEventListener('load', queueLayout);
+  if (document.fonts) document.fonts.ready.then(queueLayout);
+  queueLayout();
+</script>
+</body>
+</html>
