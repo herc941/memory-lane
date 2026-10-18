@@ -383,12 +383,22 @@
   film.muted = true;
   let near = false;
   const tryPlay = () => { if (!near) return; const p = film.play(); if (p) p.catch(() => {}); };
+  const wake = () => {
+    if (near) return;
+    near = true; film.autoplay = true; film.preload = 'auto'; film.load(); tryPlay();
+  };
+  const isNear = () => film.getBoundingClientRect().top < innerHeight + 1500;
   film.addEventListener('loadedmetadata', () => queueLayout());
+  film.addEventListener('canplay', () => { if (film.paused) tryPlay(); });
   film.addEventListener('error', () => { film.closest('.finale').remove(); queueLayout(); });
-  ['touchstart', 'click', 'scroll'].forEach(ev => addEventListener(ev, () => { if (film.paused) tryPlay(); }, { passive: true }));
+  // a tap counts as permission on iPhones that block autoplay (e.g. Low Power Mode)
+  ['touchstart', 'touchend', 'click', 'scroll'].forEach(ev => addEventListener(ev, () => {
+    if (!near && isNear()) wake();
+    if (film.paused) tryPlay();
+  }, { passive: true }));
   new IntersectionObserver(([e]) => {
     if (!e.isIntersecting) return;
-    if (!near) { near = true; film.preload = 'auto'; film.load(); }
+    wake();
     if (film.paused) tryPlay();
   }, { rootMargin: '0px 0px 1500px 0px' }).observe(film);
 
