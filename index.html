@@ -128,10 +128,10 @@
     border-radius: 2px;
     box-shadow: 0 2px 4px rgba(60, 30, 30, .08), 0 12px 28px rgba(60, 30, 30, .14);
     transform: translateX(var(--dx)) rotate(var(--tilt));
-    transition: transform .6s cubic-bezier(.2, .8, .2, 1), box-shadow .4s ease, opacity 1.2s ease;
+    transition: transform .6s cubic-bezier(.2, .8, .2, 1), box-shadow .4s ease, opacity .7s ease;
     -webkit-touch-callout: none;
   }
-  .photo img { display: block; width: 100%; height: auto; border-radius: 1px; transition: filter 1.4s ease; }
+  .photo img { display: block; width: 100%; height: auto; border-radius: 1px; transition: filter .6s ease; }
   /* faded, like an old print */
   .photo:not(.us) img { filter: sepia(.38) saturate(.72) contrast(.94) brightness(1.03); }
   .photo:not(.us)::before { /* tape */
@@ -173,8 +173,8 @@
   .finale { position: relative; z-index: 2; display: flex; justify-content: center; padding: 40px 16px 140px; }
   .photo.us.film { width: min(760px, 92vw); padding: 16px 16px 66px; }
   .photo.film video {
-    display: block; width: 100%; height: auto; border-radius: 1px; background: #000;
-    pointer-events: none; transition: filter 1.4s ease;
+    display: block; width: 100%; height: auto; aspect-ratio: 854 / 480; border-radius: 1px; background: #000;
+    pointer-events: none; transition: filter .6s ease;
   }
   .photo.film video::-webkit-media-controls,
   .photo.film video::-webkit-media-controls-start-playback-button,
@@ -312,7 +312,7 @@
       <figure class="photo us film pending">
         <span class="pin">&#9829;</span>
         <video src="photos/us-video.mp4" poster="photos/us-video-poster.jpg"
-               autoplay muted loop playsinline webkit-playsinline disablepictureinpicture disableremoteplayback preload="auto"></video>
+               muted loop playsinline webkit-playsinline disablepictureinpicture disableremoteplayback preload="none"></video>
         <figcaption>this is us. I don't ever want to lose it.</figcaption>
       </figure>
     </section>
@@ -368,6 +368,8 @@
     img.alt = fig.classList.contains('us') ? 'The two of us' : 'A memory';
     img.decoding = 'async';
     img.draggable = false;
+    if (fig.closest('.hero')) img.fetchPriority = 'high'; // first thing she sees
+    else img.loading = 'eager';
     img.onload = () => queueLayout();
     img.onerror = () => { fig.remove(); queueLayout(); };
     img.src = fig.dataset.src;
@@ -375,15 +377,20 @@
     if (!fig.closest('.hero')) fig.classList.add('pending');
   });
 
-  // the video: silent, looping, no controls; nudged to play if a phone holds it back
+  // the video: silent, looping, no controls. It only starts downloading once she's getting close,
+  // so it doesn't slow the photos down; then it's nudged to play if a phone holds it back
   const film = document.querySelector('.photo.film video');
   film.muted = true;
-  const tryPlay = () => { const p = film.play(); if (p) p.catch(() => {}); };
+  let near = false;
+  const tryPlay = () => { if (!near) return; const p = film.play(); if (p) p.catch(() => {}); };
   film.addEventListener('loadedmetadata', () => queueLayout());
   film.addEventListener('error', () => { film.closest('.finale').remove(); queueLayout(); });
-  tryPlay();
   ['touchstart', 'click', 'scroll'].forEach(ev => addEventListener(ev, () => { if (film.paused) tryPlay(); }, { passive: true }));
-  new IntersectionObserver(([e]) => { if (e.isIntersecting && film.paused) tryPlay(); }).observe(film);
+  new IntersectionObserver(([e]) => {
+    if (!e.isIntersecting) return;
+    if (!near) { near = true; film.preload = 'auto'; film.load(); }
+    if (film.paused) tryPlay();
+  }, { rootMargin: '0px 0px 1500px 0px' }).observe(film);
 
   // reveal on scroll
   const io = new IntersectionObserver(entries => {
@@ -393,7 +400,7 @@
       e.target.classList.add('in');
       io.unobserve(e.target);
     });
-  }, { threshold: 0.2 });
+  }, { threshold: 0.1 });
   document.querySelectorAll('.reveal, .photo.pending').forEach(el => io.observe(el));
 
   // ---------- the dotted lane that draws itself as you walk ----------
